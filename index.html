@@ -5,69 +5,44 @@
     <title>Working Blog</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        :root { --primary-bg: #f8f9fa; --sidebar-bg: #2c3e50; --accent-blue: #5d8aa8; --accent-grey: #7f8c8d; --text-main: #34495e; --border-color: #dcdde1; }
+        :root { 
+            --primary-bg: #f8f9fa; 
+            --sidebar-bg: #2c3e50; 
+            --accent-blue: #5d8aa8; 
+            --accent-grey: #7f8c8d; 
+            --text-main: #34495e; 
+            --border-color: #dcdde1; 
+            --danger-red: #e74c3c;
+        }
+
         body { font-family: -apple-system, sans-serif; display: flex; height: 100vh; margin: 0; background: var(--primary-bg); color: var(--text-main); }
-        #sidebar { width: 240px; background: var(--sidebar-bg); color: #ecf0f1; padding: 25px 15px; overflow-y: auto; }
-        #sidebar h3 { font-size: 14px; color: #7f8c8d; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
-        #main { flex: 1; display: flex; flex-direction: column; padding: 30px 40px; }
+        
+        /* 侧边栏 */
+        #sidebar { width: 240px; background: var(--sidebar-bg); color: #ecf0f1; padding: 25px 15px; overflow-y: auto; box-shadow: 2px 0 5px rgba(0,0,0,0.1); }
+        #sidebar h3 { font-size: 13px; color: var(--accent-grey); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
+
+        /* 主界面 */
+        #main { flex: 1; display: flex; flex-direction: column; padding: 30px 40px; position: relative; }
         .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        h2 { font-weight: 400; font-size: 24px; margin: 0; }
-        .controls { margin-bottom: 20px; display: flex; gap: 10px; }
-        input { flex: 1; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; outline: none; }
-        button { padding: 10px 20px; cursor: pointer; border: none; border-radius: 6px; font-size: 13px; transition: 0.2s; color: white; }
+        h2 { font-weight: 400; font-size: 24px; margin: 0; color: #2c3e50; }
+
+        /* 按钮与控制栏 */
+        .controls { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
+        input { flex: 1; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; outline: none; font-size: 14px; transition: 0.3s; }
+        input:focus { border-color: var(--accent-blue); }
+
+        button { padding: 10px 20px; cursor: pointer; border: none; border-radius: 6px; font-size: 13px; transition: 0.2s; color: white; font-weight: 500; }
         .btn-new { background: transparent; border: 1px solid var(--accent-blue); color: var(--accent-blue); }
         .btn-new:hover { background: var(--accent-blue); color: white; }
         .btn-save { background: var(--accent-blue); }
+        .btn-save:hover { background: #4a6d84; }
         .btn-export { background: var(--accent-grey); }
+        
+        /* 删除按钮：平时隐藏 */
+        #deleteBtn { background: transparent; color: var(--danger-red); font-size: 12px; border: none; cursor: pointer; align-self: flex-end; margin-top: 10px; display: none; }
+        #deleteBtn:hover { text-decoration: underline; }
+
+        /* 编辑与预览 */
         .editor-container { display: flex; flex: 1; gap: 25px; min-height: 0; }
-        textarea, #preview { flex: 1; padding: 25px; border: 1px solid var(--border-color); border-radius: 8px; background: white; overflow-y: auto; line-height: 1.8; }
-        textarea { border: 1px solid #e0e0e0; outline: none; resize: none; }
-        #preview { box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .log-item { padding: 12px 15px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; background: rgba(255,255,255,0.03); }
-        .log-item:hover { background: rgba(255,255,255,0.08); }
-        .log-title { font-size: 14px; color: #ecf0f1; display: block; margin-bottom: 4px; }
-        .log-time { font-size: 11px; color: #7f8c8d; display: block; }
-    </style>
-</head>
-<body>
-    <div id="sidebar"><h3>ARCHIVE</h3><div id="logList"></div></div>
-    <div id="main">
-        <div class="header-row"><h2>Working Blog</h2><button class="btn-new" onclick="newLog()">+ 新建日志</button></div>
-        <div class="controls">
-            <input type="text" id="title" placeholder="输入标题...">
-            <button class="btn-save" onclick="saveLog()">保存</button>
-            <button class="btn-export" onclick="exportJSON()">备份</button>
-        </div>
-        <div class="editor-container">
-            <textarea id="editor" placeholder="在此输入正文..." oninput="updatePreview()"></textarea>
-            <div id="preview"></div>
-        </div>
-    </div>
-    <script>
-        let logs = JSON.parse(localStorage.getItem('my_final_logs') || '{}');
-        function updatePreview() { document.getElementById('preview').innerHTML = marked.parse(document.getElementById('editor').value); }
-        function formatDate(ms) { const d = new Date(ms); return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
-        function newLog() { if (document.getElementById('editor').value && !confirm("确定新建？")) return; document.getElementById('title').value = ''; document.getElementById('editor').value = ''; document.getElementById('preview').innerHTML = ''; }
-        function saveLog() {
-            const t = document.getElementById('title').value.trim();
-            if (!t) return alert("请输入标题");
-            const now = Date.now();
-            logs[t] = { content: document.getElementById('editor').value, createdAt: logs[t] ? logs[t].createdAt : now, updatedAt: now };
-            localStorage.setItem('my_final_logs', JSON.stringify(logs));
-            render();
-        }
-        function render() {
-            const list = document.getElementById('logList'); list.innerHTML = '';
-            Object.keys(logs).sort((a, b) => logs[b].updatedAt - logs[a].updatedAt).forEach(t => {
-                const item = logs[t];
-                const div = document.createElement('div'); div.className = 'log-item';
-                div.innerHTML = `<span class="log-title">${t}</span><span class="log-time">创: ${formatDate(item.createdAt)}</span><span class="log-time">修: ${formatDate(item.updatedAt)}</span>`;
-                div.onclick = () => { document.getElementById('title').value = t; document.getElementById('editor').value = item.content; updatePreview(); };
-                list.appendChild(div);
-            });
-        }
-        function exportJSON() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(logs)); a.download = `backup.json`; a.click(); }
-        render();
-    </script>
-</body>
-</html>
+        textarea, #preview { flex: 1; padding: 25px; border: 1px solid var(--border-color); border-radius: 8px; background: white; overflow-y: auto; line-height: 1.8; font-size: 15px; }
+        textarea { border: 1px solid #e0e0e0; outline: none; resize: none
